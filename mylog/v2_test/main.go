@@ -6,12 +6,14 @@ import (
 
 // 测试自己写的日志库
 func main() {
-	log := mylogger.NewFileLogger("debug", "./", "debug.log", 100)
+	log := mylogger.NewFileLogger("debug", "./", "debug.log", 10*1024)
 
-	log.Debug("debug= %s", "错误日志")
-	log.Trace("Trace")
-	log.Info("info")
-	log.Warning("Warning")
-	log.Error("Error")
-	log.Fatal("Fatal")
+	for {
+		log.Debug("debug= %s", "错误日志")
+		log.Trace("Trace")
+		log.Info("info")
+		log.Warning("Warning")
+		log.Error("Error")
+		log.Fatal("Fatal")
+	}
 }
