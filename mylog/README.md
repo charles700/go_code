@@ -43,14 +43,30 @@
         - 在初始化时 传入`maxFileSize` 来限制单个日志文件大小
         - 使用 `os.Rename` 来重命名旧的日志文件，然后继续向初始日志文件路径中写日志
 
-  - 按日期分割
+
+### v3 按日期分割
+- 定义接口
+- 按日期分割
+```golang
+// 没次遇到 10、20、30 等 秒时切割
+func (l *FileLogger) checkTime() bool {
+	// 按秒来切割日志
+	second := time.Now().Format("05")
+	fmt.Printf("%s \n", time.Now().Format("2006-01-02 15:04:05"))
+	i, err := strconv.Atoi(second)
+	if err != nil {
+		fmt.Printf("%v", err)
+		return false
+	}
+	return i%10 == 0
+}
+```
+
+### v4 异步写日志 - goroutine
 
 
-### v3 异步写日志 - goroutine
 
-
-
-### v4 写入kafka
+### v5 写入kafka
 
 
 
