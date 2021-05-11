@@ -63,7 +63,13 @@ func (l *FileLogger) checkTime() bool {
 ```
 
 ### v4 异步写日志 - goroutine
-
+要点：
+- 在 `FileLogger` 结构体中加入一个通道
+- 通道类型为一个[结构体的指针] -- 存储的数据量很小
+  - 通道类型不能是string, 因为 string 是 int64 ，占 8个字节
+- 在构造函数中就开启 `goroutine`从 通道中 读取日志,来写入文件
+  - 使用 `select` ，并 默认增加 休眠时间，释放CPU
+- 在统一的 `log` 方法中向通道写入日志数据
 
 
 ### v5 写入kafka
