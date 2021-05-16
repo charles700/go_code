@@ -37,7 +37,9 @@ func main() {
 		//使用context控制srv.Shutdown的超时时间
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
+		fmt.Println("111")
 		err := srv.Shutdown(ctx)
+		fmt.Println("222")
 
 		if err != nil {
 			fmt.Println(err)
