@@ -72,13 +72,14 @@ func (l *FileLogger) checkTime() bool {
 - 在统一的 `log` 方法中向通道写入日志数据
 
 
-### v5 写入kafka
+### v5 LogAgent
 
 要点：
 1. `kafka` 和 `zookeeper` 安装与启动
 2.  使用 `hpcloud/tail` 模块, 监听文件新增内容，获取最新内容（读取最新行）
 > go get github.com/hpcloud/tail
-3. 
+3. tail 接收到新日志后，使用 `sarama` 模块，连接kafka, 并发送给 kafka
+
 
 
 ### v6 日志集成 ELK
