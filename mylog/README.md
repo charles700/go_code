@@ -74,6 +74,11 @@ func (l *FileLogger) checkTime() bool {
 
 ### v5 写入kafka
 
+要点：
+1. `kafka` 和 `zookeeper` 安装与启动
+2.  使用 `hpcloud/tail` 模块, 监听文件新增内容，获取最新内容（读取最新行）
+> go get github.com/hpcloud/tail
+3. 
 
 
-### v5 日志集成 ELK
+### v6 日志集成 ELK
