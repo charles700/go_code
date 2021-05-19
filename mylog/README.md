@@ -79,7 +79,7 @@ func (l *FileLogger) checkTime() bool {
 2.  使用 `hpcloud/tail` 模块, 监听文件新增内容，获取最新内容（读取最新行）
 > go get github.com/hpcloud/tail
 3. tail 接收到新日志后，使用 `sarama` 模块，连接kafka, 并发送给 kafka
-
+4. 使用 `gopkg.in/ini.v1` 来加载配置文件
 
 
 ### v6 日志集成 ELK
