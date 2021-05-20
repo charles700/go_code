@@ -82,4 +82,9 @@ func (l *FileLogger) checkTime() bool {
 4. 使用 `gopkg.in/ini.v1` 来加载配置文件
 
 
+### v6 使用 etcd 作为日志手机的配置中心
+1. 建立 etcd 的配置，存储 手机日志的 topic 和 要收集的日志文件（从配置文件迁移到 etcd 中）
+2. 从 etcd 中拉取日志收集项的配置信息，并监视日志收集项的变化，实时通知 logagent, 热加载
+
+
 ### v6 日志集成 ELK
