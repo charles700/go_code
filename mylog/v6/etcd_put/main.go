@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"go_demos/my_demos/mylog/v6/utils"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -24,7 +25,12 @@ func main() {
 	// value := `[{"path":"/tmp/nginx2.log", "topic":"nginx_log"}]`
 	value := `[{"path":"/tmp/nginx.log", "topic":"nginx_log"},{"path":"/tmp/redis.log", "topic":"redis_log"},{"path":"/tmp/mysql.log", "topic":"mysql_log"}]`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	_, err = cli.Put(ctx, "/logagent/collect_config", value)
+	ip, err := utils.GetOutBoundIp()
+	if err != nil {
+		return
+	}
+	key := fmt.Sprintf("/logagent/%s/collect_config", ip)
+	_, err = cli.Put(ctx, key, value)
 	cancel()
 	if err != nil {
 		fmt.Printf("put to etcd failed, err:%v\n", err)
