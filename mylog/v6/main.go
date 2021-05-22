@@ -13,20 +13,20 @@ import (
 
 var cfg = new(v6_config.AppConfig)
 
-func run() {
-	// 1. 读取日志信息
+// func run() {
+// 	// 1. 读取日志信息
 
-	for {
-		select {
-		case line := <-taillog.ReadChan():
-			// 2. 发送到 kafka
-			kafka.SendToKafka(cfg.KafkaConf.Topic, line.Text)
-		default:
-			time.Sleep(time.Second)
-		}
-	}
+// 	for {
+// 		select {
+// 		case line := <-taillog.ReadChan():
+// 			// 2. 发送到 kafka
+// 			kafka.SendToKafka(cfg.KafkaConf.Topic, line.Text)
+// 		default:
+// 			time.Sleep(time.Second)
+// 		}
+// 	}
 
-}
+// }
 
 // LogAgent 入口程序
 func main() {
@@ -40,8 +40,7 @@ func main() {
 	}
 
 	// 1 初始化 Kafka 连接
-	err = kafka.Init([]string{cfg.KafkaConf.Addr})
-
+	err = kafka.Init([]string{cfg.KafkaConf.Addr}, cfg.KafkaConf.MaxSize)
 	if err != nil {
 		fmt.Println("init kafka faild, err:", err)
 		return
@@ -56,7 +55,7 @@ func main() {
 	}
 	fmt.Println("初始化 etcd 成功")
 
-	// 从etcd 中获取日志手机配置项的信息
+	// 2. 从etcd 中获取日志收集配置项的信息 - topic, kafka 等
 	logEntryConf, err := etcd.GetConf(cfg.EtcdConf.Key)
 
 	if err != nil {
@@ -64,19 +63,9 @@ func main() {
 		return
 	}
 
-	for index, value := range logEntryConf {
-		fmt.Println("get etcd config info success, ", index, value)
-	}
+	// 3.收集日志发往kafka
+	taillog.Init(logEntryConf)
 
-	// // 2 打开日志文件准备收集
-	// err = taillog.Init(cfg.TaillogConf.Filename)
-
-	// if err != nil {
-	// 	fmt.Println("init taild faild, err:", err)
-	// 	return
-	// }
-
-	// fmt.Println("初始化 taillog 成功")
-
+	// 4. run
 	// run()
 }

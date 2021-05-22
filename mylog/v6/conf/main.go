@@ -6,8 +6,9 @@ type AppConfig struct {
 }
 
 type KafkaConf struct {
-	Addr  string `ini:"address"`
-	Topic string `ini:"topic"`
+	Addr    string `ini:"address"`
+	Topic   string `ini:"topic"`
+	MaxSize int    `ini:"max_size"`
 }
 
 type EtcdConf struct {
