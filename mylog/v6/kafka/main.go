@@ -57,7 +57,7 @@ func SendToKafka() {
 				fmt.Println("send msg failed, err:", err)
 				return
 			}
-			fmt.Printf("pid:%v offset:%v\n", pid, offset)
+			fmt.Printf("SendToKafka success pid:%v offset:%v topic:%v \n", pid, offset, ld.topic)
 
 		default:
 			time.Sleep(time.Millisecond * 50)

@@ -21,8 +21,8 @@ func main() {
 	defer cli.Close()
 
 	// put
-	value := `[{"path":"/tmp/nginx.log", "topic":"nginx_log"}]`
-	// value := `[{"path":"/tmp/nginx.log", "topic":"nginx_log"},{"path":"/tmp/redis.log", "topic":"redis_log"},{"path":"/tmp/mysql.log", "topic":"mysql_log"}]`
+	// value := `[{"path":"/tmp/nginx2.log", "topic":"nginx_log"}]`
+	value := `[{"path":"/tmp/nginx.log", "topic":"nginx_log"},{"path":"/tmp/redis.log", "topic":"redis_log"},{"path":"/tmp/mysql.log", "topic":"mysql_log"}]`
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	_, err = cli.Put(ctx, "/logagent/collect_config", value)
 	cancel()

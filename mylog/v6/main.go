@@ -16,21 +16,6 @@ var cfg = new(v6_config.AppConfig)
 
 var wg sync.WaitGroup
 
-// func run() {
-// 	// 1. 读取日志信息
-
-// 	for {
-// 		select {
-// 		case line := <-taillog.ReadChan():
-// 			// 2. 发送到 kafka
-// 			kafka.SendToKafka(cfg.KafkaConf.Topic, line.Text)
-// 		default:
-// 			time.Sleep(time.Second)
-// 		}
-// 	}
-
-// }
-
 // LogAgent 入口程序
 func main() {
 
@@ -76,6 +61,4 @@ func main() {
 	go etcd.WatcConf(cfg.EtcdConf.Key, newConfChan) // 哨兵	发现配置有变化 及时通知 logAgent 热加载配置
 	wg.Wait()
 
-	// 4. run
-	// run()
 }

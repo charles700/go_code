@@ -22,7 +22,10 @@ func Init(logConf []*etcd.LogEntry) {
 		newConfChan: make(chan []*etcd.LogEntry), // 无缓冲区通道
 	}
 	for _, logEntry := range logConf {
-		NewTailTask(logEntry.Path, logEntry.Topic)
+		tailTask := NewTailTask(logEntry.Path, logEntry.Topic)
+		// 存储一份map用来做新增、更新、删除
+		key := fmt.Sprintf("%s_%s", logEntry.Path, logEntry.Topic)
+		tailTaskMgr.taskMap[key] = tailTask
 	}
 
 	go tailTaskMgr.run()
@@ -34,9 +37,38 @@ func (t *TailTaskMgr) run() {
 	for {
 		select {
 		case newConf := <-t.newConfChan:
-			// 1. 配置新增
-			// 2. 配置删除
-			// 3. 配置变更
+			// 配置新增、变更
+			for _, config := range newConf {
+				key := fmt.Sprintf("%s_%s", config.Path, config.Topic)
+				_, ok := t.taskMap[key]
+				if ok {
+					// 原来就有
+					continue
+				} else {
+					// 新增task
+					tailTask := NewTailTask(config.Path, config.Topic)
+					t.taskMap[key] = tailTask
+				}
+			}
+			// 处理配置删除
+			for _, c1 := range t.logConf {
+				isDel := true
+				for _, c2 := range newConf {
+					if c1.Path == c2.Path && c1.Topic == c2.Topic {
+						isDel = false
+						continue
+					}
+				}
+
+				if isDel {
+					// 把c1 对应的 task 停止掉
+					key := fmt.Sprintf("%s_%s", c1.Path, c1.Topic)
+					_, ok := t.taskMap[key]
+					if ok {
+						t.taskMap[key].cancelFunc()
+					}
+				}
+			}
 			fmt.Println("新的配置来了", newConf)
 		default:
 			time.Sleep(time.Millisecond * 50)

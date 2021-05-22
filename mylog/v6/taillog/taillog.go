@@ -1,6 +1,7 @@
 package taillog
 
 import (
+	"context"
 	"fmt"
 	"go_demos/my_demos/mylog/v6/kafka"
 
@@ -11,15 +12,20 @@ import (
 
 // TailTask  一个日志手机任务，包含单独的 tailTask  实例
 type TailTask struct {
-	path     string
-	topic    string
-	instance *tail.Tail
+	path       string
+	topic      string
+	instance   *tail.Tail
+	ctx        context.Context
+	cancelFunc context.CancelFunc
 }
 
 func NewTailTask(path, topic string) (tailTask *TailTask) {
+	ctx, cancel := context.WithCancel(context.Background())
 	tailTask = &TailTask{
-		path:  path,
-		topic: topic,
+		path:       path,
+		topic:      topic,
+		ctx:        ctx,
+		cancelFunc: cancel,
 	}
 	// 根据路径打开日志问阿金
 	tailTask.init()
@@ -50,6 +56,10 @@ func (t *TailTask) Run() {
 		case line := <-t.instance.Lines:
 			// 发往 kafka 通道
 			kafka.SendToChan(t.topic, line.Text)
+		case <-t.ctx.Done():
+			// 终止 goroutine,
+			fmt.Printf("tailTask : %s_%s exited \n", t.path, t.topic)
+			return
 		default:
 		}
 	}
