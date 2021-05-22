@@ -83,8 +83,36 @@ func (l *FileLogger) checkTime() bool {
 
 
 ### v6 使用 etcd 作为日志手机的配置中心
-1. 建立 etcd 的配置，存储 手机日志的 topic 和 要收集的日志文件（从配置文件迁移到 etcd 中）
-2. 从 etcd 中拉取日志收集项的配置信息，并监视日志收集项的变化，实时通知 logagent, 热加载
+目的：
+1. `tiallog`根据 从 `etcd` 中获取的日志配置，监听日志文件的变化，把最新日志 发送给 `kafka`
+2. 当一个新的配置文件在 `etcd` 中更新时，`etcd` 要 通知 `taillog` 模块做相应处理
+
+#### 启动步骤
+1. 服务配置文件 `conf.ini` 做映射
+2. 启动`kafka` -- 根据配置
+    - 配置`address`和`chan_size`
+    - 初始化步骤
+      - 与Kafka 服务建立链接
+      - 创建一个生产者 `client` 和 消息通道 `logDataChan`
+      - 监听通道，接收到日志消息，就发送到 Kafka 服务
+3. 启动`etcd`  -- 根据配置
+    - 配置`address`、`timeout`、`collect_log_key` 
+    - 初始化步骤
+      - 创建一个客户端，与 Etcd 服务建立连接
+4. 从`etcd`中读取配置、监听 Etcd 服务中的日志配置数据变更
+> etcd 中的初始日志配置数据有 `etcd_put/main.go` 事先塞入 
+> 日志配置数据结构：`[]{topic, path}`
+    - 使用 etcd 客户端 从 Etcd 服务中读取日志配置数据，并返回
+    - 
+
+5. 获取日志配置数据后，初始化 `taillog`服务
+   - 初始化步骤
+     - 每一条配置都启动一个 `TailTask` 任务
+      - 使用 `tail` 模块 从`path`中读取信息，发送给 Kafka 的 `topic`
+     - 创建一个通道`newConfChan`，监听日志配置数据的变更
+        - 由其他人员更改了etcd 中的日志配置数据
+        - etcd 监听到 变更，向通道喜欢滴信息
+        - `taillog` 模块的 `newConfChan` 通道 接收到 变更后，再做相应处理
 
 
 ### v6 日志集成 ELK
