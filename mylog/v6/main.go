@@ -6,12 +6,15 @@ import (
 	"go_demos/my_demos/mylog/v6/etcd"
 	"go_demos/my_demos/mylog/v6/kafka"
 	"go_demos/my_demos/mylog/v6/taillog"
+	"sync"
 	"time"
 
 	"gopkg.in/ini.v1"
 )
 
 var cfg = new(v6_config.AppConfig)
+
+var wg sync.WaitGroup
 
 // func run() {
 // 	// 1. 读取日志信息
@@ -63,8 +66,15 @@ func main() {
 		return
 	}
 
-	// 3.收集日志发往kafka
+	// 2.初始化收集日志发往kafka
 	taillog.Init(logEntryConf)
+
+	// 3 派一个哨兵 监视 日志收集项的变化，
+
+	newConfChan := taillog.NewConfChan()
+	wg.Add(1)                                       // 从logtail中获取 chan
+	go etcd.WatcConf(cfg.EtcdConf.Key, newConfChan) // 哨兵	发现配置有变化 及时通知 logAgent 热加载配置
+	wg.Wait()
 
 	// 4. run
 	// run()

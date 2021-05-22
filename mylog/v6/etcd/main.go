@@ -54,3 +54,28 @@ func GetConf(key string) (logEntryConf []*LogEntry, err error) {
 	}
 	return
 }
+
+func WatcConf(key string, newLogConfChan chan<- []*LogEntry) {
+	rch := client.Watch(context.Background(), key) // <-chan WatchResponse
+	for wresp := range rch {
+		for _, ev := range wresp.Events {
+			fmt.Printf("Type: %s Key:%s Value:%s\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
+			// 发现配置更新了 通知 tailllogMgr 中的 tailTask 的 logConf
+
+			var newConf []*LogEntry
+
+			if ev.Type != clientv3.EventTypeDelete {
+				// 删除操作，不处理配置
+				err := json.Unmarshal(ev.Kv.Value, &newConf)
+
+				if err != nil {
+					fmt.Printf("Unmarshal faild, err:%v \n", err)
+					continue
+				}
+
+			}
+			fmt.Println("接收到了新的配置", newConf)
+			newLogConfChan <- newConf
+		}
+	}
+}
