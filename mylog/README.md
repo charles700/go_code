@@ -115,4 +115,13 @@ func (l *FileLogger) checkTime() bool {
         - `taillog` 模块的 `newConfChan` 通道 接收到 变更后，再做相应处理
 
 
-### v6 日志集成 ELK
+### v7 logTransfer
+1. 从kafka 中把日志取出来，写入ES，使用Kibana 做可视化展示
+
+
+### v8 系统监控
+1. 系统监控
+   - gopsutil 库 做系统监控、信息采集，写入 influxDB 中 使用 grafana 做展示
+2. prometheus 监控、采集指标、保存， 使用 grafana 做展示
+
+
