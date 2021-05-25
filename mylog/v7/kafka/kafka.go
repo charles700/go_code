@@ -37,12 +37,13 @@ func Init(addrs string, topic string) (err error) {
 				fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v\n", msg.Partition, msg.Offset, msg.Key, string(msg.Value))
 
 				// 往es 中发送消息，要保证是 json 格式
-				ld := map[string]interface{}{
-					"data": string(msg.Value),
+				ld := es.LogData{
+					Data:  string(msg.Value),
+					Topic: topic,
 				}
 
 				// 准备消息，把消息发送到 es
-				es.SendToES(topic, ld)
+				es.SendToESChan(&ld)
 			}
 		}(pc)
 		select {}

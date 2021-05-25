@@ -24,7 +24,7 @@ func main() {
 
 	// 1. 初始化 es
 	// 1.1 提供一个往 es 写数据的函数，给 kafka 用
-	err = es.Init(cfg.ESCfg.Address)
+	err = es.Init(cfg.ESCfg.Address, cfg.ESCfg.ChanSize)
 	if err != nil {
 		fmt.Printf("init ES consumer failed, err:%v \n", err)
 		return

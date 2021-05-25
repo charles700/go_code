@@ -7,7 +7,8 @@ type LogTransferCfg struct {
 }
 
 type ESCfg struct {
-	Address string `ini:"address"`
+	Address  string `ini:"address"`
+	ChanSize int    `ini:"chansize"`
 }
 
 type KafkaCfg struct {

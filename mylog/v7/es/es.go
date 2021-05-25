@@ -4,13 +4,20 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/olivere/elastic"
 )
 
-var client *elastic.Client
+type LogData struct {
+	Data  string
+	Topic string
+}
 
-func Init(address string) (err error) {
+var client *elastic.Client
+var ch chan *LogData
+
+func Init(address string, chanSize int) (err error) {
 	if !strings.HasPrefix(address, "http://") {
 		address = "http://" + address
 	}
@@ -19,25 +26,35 @@ func Init(address string) (err error) {
 		fmt.Printf("init es client failed, err:%v\n", err)
 		return
 	}
+
+	ch = make(chan *LogData, chanSize)
+	go SendToES()
+
 	return
 }
 
-func SendToES(index string, data interface{}) error {
+func SendToES() error {
+	for {
+		select {
+		case msg := <-ch:
+			//  插入一条记录
+			put1, err := client.Index().
+				Index(msg.Topic). // 指定数据库
+				Type("xxx").      // 指定表, 可以传 不同的id, 按照机器来划分 log
+				BodyJson(msg).    // 发送的数据
+				Do(context.Background())
 
-	//  插入一条记录
-	put1, err := client.Index().
-		Index(index).   // 指定数据库
-		Type("xxx").    // 指定表, 可以传 不同的id, 按照机器来划分 log
-		BodyJson(data). //
-		Do(context.Background())
-
-	if err != nil {
-		fmt.Printf("send msg to es failed, err:%v\n", err)
-		return err
+			if err != nil {
+				fmt.Printf("send msg to es failed, err:%v\n", err)
+				continue
+			}
+			fmt.Printf("INSERT ES SUCCESS -- Indexs %s %s to index %s , type %s \n", msg.Topic, put1.Id, put1.Index, put1.Type)
+		default:
+			time.Sleep(time.Second)
+		}
 	}
+}
 
-	// 输出插入的数据的id 和 索引库
-	fmt.Printf("INSERT -- Indexs %s %s to index %s , type %s \n", index, put1.Id, put1.Index, put1.Type)
-
-	return nil
+func SendToESChan(data *LogData) {
+	ch <- data
 }
