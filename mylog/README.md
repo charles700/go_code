@@ -116,7 +116,10 @@ func (l *FileLogger) checkTime() bool {
 
 
 ### v7 logTransfer
+> v7 logTransfer 依赖 v6 的 logAgent
 1. 从kafka 中把日志取出来，写入ES，使用Kibana 做可视化展示
+2. 从kibana 中 根据 kafka 的 topic  建立 Index patterns
+3. 在 Discover 中 选择 对应的索引，可以进行搜索
 
 
 ### v8 系统监控
